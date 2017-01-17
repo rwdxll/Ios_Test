@@ -13,11 +13,7 @@ from bs4 import BeautifulSoup
 
 appName = u"旧爱闲置-闲置物品交易购物平台"
 
-ios_app_keywords = ["旧爱","二手","闲置","闲鱼","咸鱼网","转转","少铺",
-				"空空狐","心上","花粉儿","百姓","赶集网","xianyu","爱丁猫","天猫",
-				"淘宝","手机版","taobao58","同城app","数码宝贝","鱼塘","秒赚","寺库",
-				"胖虎","打折扣","买卖","衣服","奢侈品","奢家","代购","母婴","挣钱",
-				"包优购","支付宝","返利网","心上"]
+ios_app_keywords = ["旧爱","二手"]
 
 #download search page
 def search_pages(keywords):
@@ -49,6 +45,12 @@ def get_appstore_ranking_results(page):
 							for ranking in rankList.find('a')]
 	return appstore_results
 
-keyword_ranking = [r for keyword in ios_app_keywords for r in get_appstore_ranking_results(search_pages(keyword)) if appName in r ]
+# keyword_ranking = [r for keyword in ios_app_keywords for r in get_appstore_ranking_results(search_pages(keyword)) if appName in r ]
 
-print json.dumps(dict(zip(ios_app_keywords,keyword_ranking)), encoding="UTF-8", ensure_ascii=False)
+# print json.dumps(dict(zip(ios_app_keywords,keyword_ranking)), encoding="UTF-8", ensure_ascii=False)
+
+result = []
+for keyword in ios_app_keywords:
+	result.append(get_appstore_ranking_results(search_pages(keyword)))
+print json.dumps(dict(zip(ios_app_keywords,result)), encoding="UTF-8", ensure_ascii=False)
+
