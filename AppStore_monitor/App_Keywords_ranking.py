@@ -7,13 +7,15 @@ import re
 import time
 import json
 import requests
-
-import html5lib
 from bs4 import BeautifulSoup
 
 appName = u"旧爱闲置-闲置物品交易购物平台"
 
-ios_app_keywords = ["旧爱","二手"]
+ios_app_keywords = [
+	"旧爱","二手","闲置","奢侈品""闲鱼","转转","少铺","空空狐","心上","花粉儿","咸鱼网",
+	"百姓","赶集网","xianyu","爱丁猫","天猫","淘宝","手机版","taobao58","同城app",
+	"数码宝贝","鱼塘","秒赚","寺库","胖虎","打折扣","买卖","衣服",,"奢家",
+	"代购","母婴","挣钱","包优购","支付宝","返利网","心上"]
 
 #download search page
 def search_pages(keywords):
@@ -52,5 +54,4 @@ def get_appstore_ranking_results(page):
 result = []
 for keyword in ios_app_keywords:
 	result.append(get_appstore_ranking_results(search_pages(keyword)))
-print json.dumps(dict(zip(ios_app_keywords,result)), encoding="UTF-8", ensure_ascii=False)
-
+print(json.dumps(dict(zip(ios_app_keywords,result)), encoding="UTF-8", ensure_ascii=False))
