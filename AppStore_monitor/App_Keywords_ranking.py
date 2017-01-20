@@ -29,13 +29,12 @@ headers = {
 	"Accept-Language":"zh-CN,zh;q=0.8"
 	}
 
-proxies = {'http':"http://121.232.147.28:9000"}
-
 #download search page
 def search_pages(keywords):
+	proxies = {'http':"http://50.93.203.31:1080/"}
 	try:
 		response = requests.get('https://aso100.com/search?country=cn&search={0}'.
-			format(keywords),headers=headers,proxies=proxies)
+			format(keywords),headers=headers,proxies=proxies,verify=False)
 		response.cookies.clear()
 		if response.status_code != 200:
 			response.cookies.clear()
