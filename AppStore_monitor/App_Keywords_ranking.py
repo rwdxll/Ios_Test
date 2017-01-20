@@ -6,7 +6,9 @@ import sys
 import re
 import time
 import json
+import random
 import requests
+from requests import Session
 from bs4 import BeautifulSoup
 
 appName = u"旧爱闲置-闲置物品交易购物平台"
@@ -36,25 +38,43 @@ def search_pages(keywords):
 			format(keywords),headers=headers,proxies=proxies)
 		if response.status_code != 200:
 			print("-> {0}: Page error........{1}".format(keywords,response.status_code))
-	except Exception,e:
-		print(e)
+	except requests.URLRequired:
+		print(" -> A valid URL is required to make a reques.\n")
+	except requests.ConnectionError:
+		print(" -> Network connection error.\n")
+		sys.exit()
+	except requests.HTTPError:
+		print(" -> An HTTP error occurred.\n")
+	except (requests.Timeout,requests.ConnectTimeout) as e:
+		print(" -> The request or trying to connect servertimed out.\n")
+	else:
+		time.sleep(random.randint(1,5))
 	return response.content
 
 #获取Appstore排名List
 def get_appstore_ranking_results(page):
 	expected_title = u'搜索结果'
+	appstore_results = []
 	soup = BeautifulSoup(page,'html.parser')
 	# soup.prettify() 指定编码,格式化输出
-	soup_title= soup.title.prettify()
-	response_title = soup_title.replace("<title>","").replace("</title>","").strip()
-	if expected_title in response_title:
-		print("{0}..........................ok".format(response_title.encode("gbk")))
-	else:
-		print(response_title)
-
-	appstore_results = [ranking for applist in soup.find_all(class_="app-list") 
+	try:
+		soup_title= soup.title.prettify()
+		response_title = soup_title.replace("<title>","").replace("</title>","").strip()
+		if expected_title in response_title:
+			print("\n {0}..........................ok \n".format(response_title.encode("gbk")))
+		else:
+			print(response_title)
+			sys.exit()
+		try:
+			appstore_results = [ranking for applist in soup.find_all(class_="app-list") 
 						for rankList in applist.find_all('h4',class_="media-heading") 
 						for ranking in rankList.find('a')]
+		except Exception,e:
+			print(e)
+		else:
+			print(json.dumps(appstore_results, encoding="UTF-8", ensure_ascii=False))
+	except Exception,e:
+		pass
 	return appstore_results
 
 #关键词搜索,前20名搜索结果
