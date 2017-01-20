@@ -17,7 +17,7 @@ ios_app_keywords = [
 	"旧爱","二手","闲置","奢侈品","闲鱼","转转","少铺","空空狐","心上","花粉儿","咸鱼网",
 	"百姓","赶集网","xianyu","爱丁猫","天猫","淘宝","手机版","taobao58","同城app",
 	"数码宝贝","鱼塘","秒赚","寺库","胖虎","打折扣","买卖","衣服","奢家",
-	"代购","母婴","挣钱","包优购","支付宝","返利网","心上"]
+	"代购","母婴","挣钱","包优购","支付宝","返利网"]
 
 headers = {
 	"Connection":"keep-alive",
@@ -36,7 +36,9 @@ def search_pages(keywords):
 	try:
 		response = requests.get('https://aso100.com/search?country=cn&search={0}'.
 			format(keywords),headers=headers,proxies=proxies)
+		response.cookies.clear()
 		if response.status_code != 200:
+			response.cookies.clear()
 			print("-> {0}: Page error........{1}".format(keywords,response.status_code))
 	except requests.URLRequired:
 		print(" -> A valid URL is required to make a reques.\n")
@@ -48,7 +50,7 @@ def search_pages(keywords):
 	except (requests.Timeout,requests.ConnectTimeout) as e:
 		print(" -> The request or trying to connect servertimed out.\n")
 	else:
-		time.sleep(random.randint(1,5))
+		time.sleep(random.randint(1,3))
 	return response.content
 
 #获取Appstore排名List
@@ -64,7 +66,7 @@ def get_appstore_ranking_results(page):
 			print("\n {0}..........................ok \n".format(response_title.encode("gbk")))
 		else:
 			print(response_title)
-			sys.exit()
+			time.sleep(30)
 		try:
 			appstore_results = [ranking for applist in soup.find_all(class_="app-list") 
 						for rankList in applist.find_all('h4',class_="media-heading") 
@@ -78,11 +80,21 @@ def get_appstore_ranking_results(page):
 	return appstore_results
 
 #关键词搜索,前20名搜索结果
-# result = []
-# for keyword in ios_app_keywords:
-# 	result.append(get_appstore_ranking_results(search_pages(keyword)))
-# print(json.dumps(dict(zip(ios_app_keywords,result)), encoding="UTF-8", ensure_ascii=False))
+all_result = []
+assign_app_result = []
+
+for keyword in ios_app_keywords:
+	temp = []
+	for r in get_appstore_ranking_results(search_pages(keyword)):
+		temp.append(r)
+		if appName in r:
+			assign_app_result.append(r)
+	all_result.append(temp)
+
+#打印所有结果
+print("\n------------------------------------------\n")
+print(json.dumps(dict(zip(ios_app_keywords,all_result)), encoding="UTF-8", ensure_ascii=False))
 
 #筛选出包括特定包名的搜索结果
-keyword_ranking = [r for keyword in ios_app_keywords for r in get_appstore_ranking_results(search_pages(keyword)) if appName in r ]
-print json.dumps(dict(zip(ios_app_keywords,keyword_ranking)), encoding="UTF-8", ensure_ascii=False)
+print("\n------------------------------------------\n")
+print(json.dumps(dict(zip(ios_app_keywords,assign_app_result)), encoding="UTF-8", ensure_ascii=False))
