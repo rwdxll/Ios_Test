@@ -68,9 +68,7 @@ def search_pages(keywords):
 		print(" -> An HTTP error occurred.\n")
 	except (requests.Timeout,requests.ConnectTimeout) as e:
 		print(" -> The request or trying to connect servertimed out.\n")
-	else:
-		time.sleep(random.randint(1,3))
-			
+
 	try:
 		appstore_results = [ranking for applist in soup.find_all(class_="app-list") 
 					for rankList in applist.find_all('h4',class_="media-heading") 
@@ -103,4 +101,4 @@ for key,value in appstore_all_results.items():
 	for item in value:
 		if appName in item:
 			patter = re.compile("[1-9]+")
-			print(key.decode('utf8').encode('gb2312'),  re.findall(patter,item))
+			print key.decode('utf8').encode('gb2312'),  ''.join(re.findall(patter,item))
