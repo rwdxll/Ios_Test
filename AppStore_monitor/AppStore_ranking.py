@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*-coding:utf-8 -*-
+#2017-02-07 update
 
 import os
 import sys
@@ -15,11 +16,10 @@ from prettytable import PrettyTable
 
 appName = u"旧爱闲置-闲置物品交易购物平台"
 
-ios_app_keywords = [
-	"旧爱","二手","闲置","奢侈品","闲鱼","转转","少铺","空空狐","心上","花粉儿","咸鱼网",
-	"百姓","赶集网","xianyu","爱丁猫","天猫","淘宝","手机版","taobao58","同城app",
-	"数码宝贝","鱼塘","秒赚","寺库","胖虎","打折扣","买卖","衣服","奢家",
-	"代购","母婴","挣钱","包优购","支付宝","返利网"]
+ios_app_keywords = ["旧爱","二手","闲置","奢侈品","闲鱼","转转","少铺","空空狐","心上","花粉儿","咸鱼网",
+	"百姓","赶集网","xianyu","爱丁猫","天猫","淘宝","手机版","taobao58","同城app","数码宝贝","鱼塘",
+	"秒赚","寺库","胖虎","打折扣","买卖","衣服","奢家","代购","母婴","挣钱","包优购","支付宝","返利网"]
+all_result,assign_result = {}.fromkeys(ios_app_keywords),{}.fromkeys(ios_app_keywords)
 
 headers = {
 	"Connection":"keep-alive",
@@ -33,10 +33,8 @@ headers = {
 
 #download search page
 def search_pages(keywords):
-
 	expected_title = u'搜索结果'
-	appstore_results = []
-
+	serach_result = []
 	try:
 		while 1:
 			# fix https ssl questions
@@ -57,7 +55,7 @@ def search_pages(keywords):
 				print("-> {0}: Page error........{1}".format(keywords,response.status_code))
 			else:
 				print(response_title)
-				time.sleep(30)
+				time.sleep(10)
 
 	except requests.URLRequired:
 		print(" -> A valid URL is required to make a reques.\n")
@@ -70,35 +68,23 @@ def search_pages(keywords):
 		print(" -> The request or trying to connect servertimed out.\n")
 
 	try:
-		appstore_results = [ranking for applist in soup.find_all(class_="app-list") 
+		serach_result = [ranking for applist in soup.find_all(class_="app-list") 
 					for rankList in applist.find_all('h4',class_="media-heading") 
 					for ranking in rankList.find('a')]
 	except Exception,e:
 		print(e)
-
-	return appstore_results
-
-
-#关键词搜索,前20名搜索结果
-all_result = []
-assign_app_result = []
+	return serach_result
 
 for keyword in ios_app_keywords:
-	temp = []
-	for r in search_pages(keyword):
-		temp.append(r)
-	all_result.append(temp)
-
-#打印所有结果
-print("\n------------------------------------------\n")
-appstore_all_results = dict(zip(ios_app_keywords,all_result))
-print(json.dumps(appstore_all_results, encoding="UTF-8", ensure_ascii=False,indent=4))
+	appstore_search_result = search_pages(keyword)
+	all_result[keyword] = appstore_search_result
+	for rt in appstore_search_result:
+		if appName in rt:
+			patter = re.compile("[1-9]+")
+			assign_result[keyword] = ''.join(re.findall(patter,rt))
 
 #筛选出包括特定包名的搜索结果
-print("\n------------------------------------------\n")
-
-for key,value in appstore_all_results.items():
-	for item in value:
-		if appName in item:
-			patter = re.compile("[1-9]+")
-			print key.decode('utf8').encode('gb2312'),  ''.join(re.findall(patter,item))
+print("\n -> AppStore: Search Result Before 20..................\n")
+print(json.dumps(all_result, encoding="UTF-8", ensure_ascii=False,indent=4))
+print("\n -> AppStore: App ranking.............................\n")
+print(json.dumps(assign_result, encoding="UTF-8", ensure_ascii=False,indent=4))
