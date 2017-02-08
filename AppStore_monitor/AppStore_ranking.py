@@ -14,11 +14,12 @@ from bs4 import BeautifulSoup
 from pprint import pprint
 from prettytable import PrettyTable
 
-appName = u"旧爱闲置-闲置物品交易购物平台"
+APP_NAME = u"旧爱闲置-闲置物品交易购物平台"
 
 ios_app_keywords = ["旧爱","二手","闲置","奢侈品","闲鱼","转转","少铺","空空狐","心上","花粉儿","咸鱼网",
 	"百姓","赶集网","xianyu","爱丁猫","天猫","淘宝","手机版","taobao58","同城app","数码宝贝","鱼塘",
 	"秒赚","寺库","胖虎","打折扣","买卖","衣服","奢家","代购","母婴","挣钱","包优购","支付宝","返利网"]
+
 all_result,assign_result = {}.fromkeys(ios_app_keywords),{}.fromkeys(ios_app_keywords)
 
 headers = {
@@ -32,7 +33,7 @@ headers = {
 	}
 
 #download search page
-def search_pages(keywords):
+def get_search_pages(keywords):
 	expected_title = u'搜索结果'
 	serach_result = []
 	try:
@@ -76,10 +77,10 @@ def search_pages(keywords):
 	return serach_result
 
 for keyword in ios_app_keywords:
-	appstore_search_result = search_pages(keyword)
-	all_result[keyword] = appstore_search_result
+	get_result = get_search_pages(keyword)
+	all_result[keyword] = get_result
 	for rt in appstore_search_result:
-		if appName in rt:
+		if APP_NAME in rt:
 			patter = re.compile("[1-9]+")
 			assign_result[keyword] = ''.join(re.findall(patter,rt))
 
