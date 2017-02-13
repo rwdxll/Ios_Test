@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #-*-coding:utf-8 -*-
-#2017-02-07 update
+
+#base on Python2.7
+#2017-02-13 update
 
 import os
 import sys
@@ -12,7 +14,6 @@ import requests
 from requests import Session
 from bs4 import BeautifulSoup
 from pprint import pprint
-from prettytable import PrettyTable
 
 APP_NAME = u"旧爱闲置-闲置物品交易购物平台"
 
@@ -25,7 +26,7 @@ all_result,assign_result = {}.fromkeys(ios_app_keywords),{}.fromkeys(ios_app_key
 headers = {
 	"Connection":"keep-alive",
 	"Content-Type":"text/html",
-	"Cache-Control":"max-age=0",
+	"Cache-Control":"no-cache",
 	"User-Agent":"Mozilla/5.0 (Windows NT 10.0;WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36",
 	"Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
 	"Accept-Encoding":"gzip,deflate,sdch,br",
@@ -40,9 +41,15 @@ def get_search_pages(keywords):
 		while 1:
 			# fix https ssl questions
 			requests.packages.urllib3.disable_warnings()
-			response = requests.get('https://aso100.com/search?country=cn&search={0}'.
-				format(keywords),headers=headers,verify=False)
 
+			session = requests.Session()
+			session.headers = headers
+			response = session.get('https://aso100.com/search?country=cn&search={0}'.
+				format(keywords),verify=False)
+
+			# print("--------------------------\n")
+			# print(session.cookies.get_dict())
+			# print(session.headers)
 			#打印titile
 			soup = BeautifulSoup(response.content,'html.parser')
 			soup_title= soup.title.prettify()
@@ -56,8 +63,8 @@ def get_search_pages(keywords):
 				print("-> {0}: Page error........{1}".format(keywords,response.status_code))
 			else:
 				print(response_title)
+				#session.headers.update({"User-Agent":"Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"})
 				time.sleep(10)
-
 	except requests.URLRequired:
 		print(" -> A valid URL is required to make a reques.\n")
 	except requests.ConnectionError:
@@ -72,14 +79,14 @@ def get_search_pages(keywords):
 		serach_result = [ranking for applist in soup.find_all(class_="app-list") 
 					for rankList in applist.find_all('h4',class_="media-heading") 
 					for ranking in rankList.find('a')]
-	except Exception,e:
+	except Exception as e:
 		print(e)
 	return serach_result
 
 for keyword in ios_app_keywords:
 	get_result = get_search_pages(keyword)
 	all_result[keyword] = get_result
-	for rt in appstore_search_result:
+	for rt in get_result:
 		if APP_NAME in rt:
 			patter = re.compile("[1-9]+")
 			assign_result[keyword] = ''.join(re.findall(patter,rt))
